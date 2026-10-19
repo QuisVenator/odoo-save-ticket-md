@@ -4,6 +4,8 @@ All notable changes are recorded here. Versions follow semantic versioning.
 
 ## Unreleased
 
+## [0.1.1] - 2026-10-19
+
 ### Fixed
 
 - Italic text now converts to `*emphasis*` instead of `_emphasis_`, matching

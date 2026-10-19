@@ -1,6 +1,6 @@
 {
   "name": "odoo-ticket-markdown",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "description": "Export the current Odoo task title and description as Markdown in Firefox.",
   "type": "module",
