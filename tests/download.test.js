@@ -51,17 +51,22 @@ test('cancellation is quiet, failure is actionable, both release the Blob', asyn
     assert.equal(mock.revoked.length, 1);
   }
 });
-test('rejects other sites, subframes, stale IDs, and invalid messages', async () => {
+test('rejects other sites, subframes, missing tabs, and non-string markdown', async () => {
   const mock = setup();
   for (const [request, source] of [
     [message, { ...sender, url: 'https://example.com/70584' }],
     [message, { ...sender, frameId: 1 }], [message, { url }],
-    [{ ...message, ticketId: '../70584' }, sender],
-    [{ ...message, ticketId: '123' }, sender],
     [{ ...message, markdown: null }, sender],
   ]) assert.equal((await mock.send(request, source)).ok, false);
   assert.equal(await mock.send({ type: 'OTHER' }, sender), undefined);
   assert.equal(mock.calls.length, 0);
+});
+test('derives the filename from the sender\'s own URL, ignoring a stale or forged client ticketId', async () => {
+  const mock = setup();
+  for (const staleTicketId of ['../70584', '123', '']) {
+    assert.deepEqual(await mock.send({ ...message, ticketId: staleTicketId }, sender), { ok: true });
+  }
+  assert.ok(mock.calls.every(call => call.filename === '70584.md'));
 });
 test('a metadata lookup failure does not invalidate an accepted download', async () => {
   const mock = setup({ searchError: new Error('Lookup failed') });

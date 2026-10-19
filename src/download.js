@@ -1,4 +1,4 @@
-import { SITE_ORIGIN, ticketIdFromUrl } from './context.js';
+import { ticketIdFromUrl } from './context.js';
 
 export function registerDownloads(browser, urls = URL) {
   const pending = new Map();
@@ -18,16 +18,16 @@ export function registerDownloads(browser, urls = URL) {
   });
   browser.runtime.onMessage.addListener(async (message, sender) => {
     if (message?.type !== 'DOWNLOAD_MARKDOWN') return undefined;
-    if (!sender.tab || sender.frameId !== 0 ||
-        !sender.url?.startsWith(`${SITE_ORIGIN}/`) ||
-        !/^\d+$/.test(message.ticketId) ||
-        ticketIdFromUrl(sender.url) !== message.ticketId ||
-        typeof message.markdown !== 'string') {
+    // Trust only the sender's own URL for the ticket ID, never the client-supplied
+    // value: Odoo's SPA router can finish rendering a new task before the address
+    // bar settles, so a client-computed ID can legitimately lag behind this one.
+    const ticketId = sender.tab && sender.frameId === 0 ? ticketIdFromUrl(sender.url) : null;
+    if (!ticketId || typeof message.markdown !== 'string') {
       return { ok: false, error: 'Invalid ticket download request.' };
     }
     const url = urls.createObjectURL(new Blob([message.markdown], { type: 'text/markdown;charset=utf-8' }));
     try {
-      const id = await browser.downloads.download({ url, filename: `${message.ticketId}.md`, saveAs: true });
+      const id = await browser.downloads.download({ url, filename: `${ticketId}.md`, saveAs: true });
       pending.set(id, url);
       // Catch downloads that completed before the download() promise resolved.
       const [item] = await browser.downloads.search({ id }).catch(() => []);
