@@ -21,9 +21,7 @@ npm run package
 ```
 
 `npm install` generates `package-lock.json`; commit it before distributing a
-release, then use `npm ci` for subsequent clean installs. Registry access was
-unavailable during implementation, so a lockfile and verified package could not
-be generated here. Direct dependencies are pinned in `package.json`.
+release, then use `npm ci` for subsequent clean installs.
 
 The build writes `dist/`; packaging writes an unsigned archive to `artifacts/`.
 Neither generated directory is tracked. All runtime dependencies are bundled
@@ -46,8 +44,10 @@ Mozilla signing; this project does not publish or sign automatically.
 
 - Targets the Odoo 19 project task form represented by the saved reference, with
   URLs such as `/odoo/action-257/185/tasks/7264/185/project.task/70584`.
-- Requires Firefox desktop 128 or newer. Other domains, Helpdesk layouts, and
-  alternate Odoo URL formats are not supported in this first release.
+- Requires Firefox desktop 142 or newer (the minimum version supporting the
+  manifest's `data_collection_permissions` declaration). Other domains,
+  Helpdesk layouts, and alternate Odoo URL formats are not supported in this
+  first release.
 - Exports rendered form content without saving the task or calling Odoo APIs.
   If the description is not rendered, open its tab and retry.
 - Includes paragraphs, headings, nested lists, emphasis, blockquotes, code,
@@ -61,8 +61,13 @@ Mozilla signing; this project does not publish or sign automatically.
 ## Tests and manual acceptance
 
 `npm test` runs Node tests with jsdom and mocked Firefox APIs. The committed HTML
-fixture is synthetic and contains no actual ticket/customer content. The supplied
-`references/` directory remains local and is excluded from Git and packaging.
+fixture is synthetic and contains no actual ticket/customer content. The
+`references/` directory is excluded from Git and packaging (see `.gitignore`)
+because a real saved task page can contain private Odoo content, and is not
+part of this repository. To use one for manual exploration, save a real task
+page's HTML locally as `references/example-page.html` (and its accompanying
+`_files/` folder, if any) — it stays untracked and is never committed or
+packaged.
 
 Before release, run all automated checks, then verify in an authenticated Firefox
 session:
@@ -77,24 +82,8 @@ session:
 
 ## Git and releases
 
-The workspace's `.git` directory is mounted read-only. Project history is kept
-in `.git-local` instead. While using this workspace, prefix Git commands with:
-
-```sh
-git --git-dir=.git-local --work-tree=. status
-```
-
-Outside the restricted environment, if `.git` is still the empty placeholder,
-copy the contents of `.git-local` into it to restore ordinary Git commands:
-
-```sh
-cp -a .git-local/. .git/
-git status
-```
-
-Do this only for the empty placeholder, not an existing repository with its own
-history. The supplied references and build artifacts are excluded from history.
-No remote repository is configured.
+The supplied references and build artifacts are excluded from history. No
+remote repository is configured.
 
 For a release, update both versions with `npm run version:set -- 0.1.1`, move the
 relevant `Unreleased` changes into a dated section in `Changelog.md`, run tests,

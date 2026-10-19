@@ -4,4 +4,3 @@ artifacts/
 references/
 coverage/
 *.log
-.git-local/

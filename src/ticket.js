@@ -41,7 +41,7 @@ export function toMarkdown({ title, description }, pageUrl) {
       } catch { node.removeAttribute(attribute); }
     });
   }
-  const converter = new TurndownService({ headingStyle: 'atx', codeBlockStyle: 'fenced', bulletListMarker: '-' });
+  const converter = new TurndownService({ headingStyle: 'atx', codeBlockStyle: 'fenced', bulletListMarker: '-', emDelimiter: '*' });
   converter.use(gfm);
   const heading = converter.escape(title.replace(/\s*\r?\n\s*/g, ' '));
   const body = converter.turndown(content).trim();
