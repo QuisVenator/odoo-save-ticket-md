@@ -1,0 +1,2 @@
+.odoo-md-export { display: inline-flex; align-items: center; gap: .5rem; flex-wrap: wrap; }
+.odoo-md-export-status { font-size: .875rem; max-width: 24rem; color: var(--body-color, inherit); }
